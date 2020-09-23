@@ -41,7 +41,8 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
             pass
 
         elif line[0][0].upper() == "F":
-            # Current dependent current source
+            current_dependen_current_source = CurrentDependentCurrentSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                                            int(line[5]), nodes_number, auxiliary_counter)
             pass
 
         elif line[0][0].upper() == "C":
@@ -130,4 +131,19 @@ class VoltageDependentCurrentSource:
     pass
 
 class CurrentDependentCurrentSource:
-    pass
+    def __init__(self, nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter):
+        self.nodeA = nodeA
+        self.nodeB = nodeB
+        self.nodeC = nodeC
+        self.nodeD = nodeD
+        self.gain = gain
+        self.nodes_number = nodes_number
+        self.auxiliary_counter = auxiliary_counter
+    
+    def print_stamp(self, matrix):
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +self.gain * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -self.gain * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeC - 1] += -1 * (self.nodeC != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeD - 1] += +1 * (self.nodeD != 0)
+        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeC != 0)
+        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeD != 0)
