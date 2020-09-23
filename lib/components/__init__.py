@@ -2,6 +2,10 @@
 The components module includes the components classes to construct components stamps.
 """
 
+import sympy as sp
+from sympy.abc import s, t
+from sympy.integrals import laplace_transform, inverse_laplace_transform 
+
 
 def create_component_stamps(lines, matrix, vector, nodes_number):
     auxiliary_counter = 0
@@ -34,8 +38,10 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
             voltage_dependent_voltage_source.print_stamp(matrix)
 
         elif line[0][0].upper() == "H":
-            # Current dependent voltage source
-            pass
+            auxiliary_counter += 2
+            current_dependent_voltage_source = CurrentDependentVoltageSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                                            float(line[5]), nodes_number, auxiliary_counter)
+            current_dependent_voltage_source.print_stamp(matrix)
 
         elif line[0][0].upper() == "G":
             voltage_dependent_current_source = VoltageDependentCurrentSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]), float(line[5]))
@@ -127,7 +133,28 @@ class VoltageDependentVoltageSource:
 
 
 class CurrentDependentVoltageSource:
-    pass
+    def __init__(self, nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter):
+        self.nodeA = nodeA
+        self.nodeB = nodeB
+        self.nodeC = nodeC
+        self.nodeD = nodeD
+        self.gain = gain
+        self.nodes_number = nodes_number
+        self.auxiliary_counter = auxiliary_counter
+    
+    def print_stamp(self, matrix):
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
+        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 2] += +1 * (self.nodeC != 0)
+        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 2] += -1 * (self.nodeD != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -2][self.nodeC - 1] += -1 * (self.nodeC != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -2][self.nodeD - 1] += +1 * (self.nodeD != 0)
+        matrix[self.nodes_number + self.auxiliary_counter - 2][self.nodes_number + self.auxiliary_counter - 2] += (((self.nodeC != 0) and (self.nodeD != 0)) and
+                                                                                                                (matrix[self.nodeC - 1][self.nodeD - 1])**(-1))
+        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 2] += +self.gain
+
 
 class VoltageDependentCurrentSource:
     def __init__(self, nodeA, nodeB, nodeC, nodeD, gain):
@@ -160,3 +187,5 @@ class CurrentDependentCurrentSource:
         matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeD - 1] += +1 * (self.nodeD != 0)
         matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeC != 0)
         matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeD != 0)
+        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (((self.nodeB != 0) and (self.nodeC != 0)) and
+                                                                                                                (matrix[self.nodeC - 1][self.nodeD - 1])**(-1))

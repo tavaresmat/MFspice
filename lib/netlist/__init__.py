@@ -31,6 +31,8 @@ class NetList:
             if element[0] in "VEF":
                 # These Leters represent components that need an auxiliary equation.
                 auxiliary += 1
+            elif element[0] in "H":
+                auxiliary += 2
             
             values = element.split()
 

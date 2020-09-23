@@ -5,6 +5,9 @@ Description: A simple electronic circuit simulator
 
 
 import numpy as np
+import sympy as sp
+from sympy.abc import s, t
+from sympy.integrals import laplace_transform, inverse_laplace_transform 
 
 from lib.netlist import NetList
 from lib import components
@@ -29,4 +32,4 @@ if __name__ == "__main__":
 
     nodes_voltage = np.linalg.solve(admittance_matrix, current_vector)
 
-    print("The voltage values are: ", nodes_voltage)
+    print("The voltage values are: \n", nodes_voltage)
