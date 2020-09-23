@@ -15,7 +15,8 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
 
         elif line[0][0].upper() == "V":
             auxiliary_counter += 1
-            voltage_source = VoltageIndependentSource(int(line[1]), int(line[2]), line[3], line[4:], nodes_number, auxiliary_counter)
+            voltage_source = VoltageIndependentSource(int(line[1]), int(line[2]), line[3], line[4:], 
+                                                        nodes_number, auxiliary_counter)
             if voltage_source.type.upper() == "DC":
                 voltage_source.print_DC_stamp(matrix, vector)
             pass
@@ -26,9 +27,10 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
                 current_source.print_DC_stamp(vector)
             pass
 
-        elif line[0][0].upper() == "A":
-            # Voltage dependent voltage source
-            pass
+        elif line[0][0].upper() == "E":
+            voltage_dependent_voltage_source = VoltageDependentVoltageSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                                            int(line[5]), nodes_number, auxiliary_counter)
+            voltage_dependent_voltage_source.print_stamp(matrix)
 
         elif line[0][0].upper() == "H":
             # Current dependent voltage source
@@ -38,7 +40,7 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
             # Voltage dependent current source
             pass
 
-        elif line[0][0].upper() == "B":
+        elif line[0][0].upper() == "F":
             # Current dependent current source
             pass
 
@@ -82,11 +84,11 @@ class VoltageIndependentSource:
     
     def print_DC_stamp(self, matrix, vector):
         self.value = int(self.type_args[0])
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter] += +1 * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter] += -1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter][self.nodeA - 1] += -1 * (self.nodeA != 0)
-        matrix[self.nodes_number + self.auxiliary_counter][self.nodeB - 1] += +1 * (self.nodeB != 0)
-        vector[self.nodes_number + self.auxiliary_counter] += -self.value
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
+        vector[self.nodes_number + self.auxiliary_counter -1] += -self.value
 
         
 class CurrentIndependentSource:
@@ -103,7 +105,23 @@ class CurrentIndependentSource:
 
 
 class VoltageDependentVoltageSource:
-    pass
+    def __init__(self, nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter):
+        self.nodeA = nodeA
+        self.nodeB = nodeB
+        self.nodeC = nodeC
+        self.nodeD = nodeD
+        self.gain = gain
+        self.nodes_number = nodes_number
+        self.auxiliary_counter = auxiliary_counter
+
+    def print_stamp(self, matrix):
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeC - 1] += +self.gain * (self.nodeC != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeD - 1] += -self.gain * (self.nodeD != 0)
+
 
 class CurrentDependentVoltageSource:
     pass

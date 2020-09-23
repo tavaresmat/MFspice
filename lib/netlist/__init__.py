@@ -20,7 +20,7 @@ class NetList:
     def define_matrix_range(self):
         """
         -> The method analyses the netlist lines and returns the dimension of the Yn matrix.
-        :return: the number N of Yn dimension(NxN). 
+        :return: the number of nodes and auxiliary equations needed to solve a Yn matrix. 
         """
         nodes = 0
         auxiliary = 0
@@ -38,4 +38,4 @@ class NetList:
                 # values[1] and values[2] are the positions for component's nodes.
                 nodes = int(max(values[1], values[2]))
 
-        return [auxiliary, nodes]
+        return [nodes, auxiliary]
