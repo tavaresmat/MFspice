@@ -38,4 +38,4 @@ class NetList:
                 # values[1] and values[2] are the positions for component's nodes.
                 nodes = int(max(values[1], values[2]))
 
-        return (auxiliary + nodes)
+        return [auxiliary, nodes]

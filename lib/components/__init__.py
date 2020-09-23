@@ -3,49 +3,54 @@ The components module includes the components classes to construct components st
 """
 
 
-def create_component_stamps(lines, matrix, vector):
+def create_component_stamps(lines, matrix, vector, nodes_number):
+    auxiliary_counter = 0
+    
     for line in lines:
         line = line.split()
 
-        if line[0][0] == "R":
-            # Resistor
+        if line[0][0].upper() == "R":
             resistor = Resistor(int(line[1]), int(line[2]), int(line[3]))
             resistor.print_stamp(matrix)
 
-        elif line[0][0] == "V":
-            # Voltage source
+        elif line[0][0].upper() == "V":
+            auxiliary_counter += 1
+            voltage_source = VoltageIndependentSource(int(line[1]), int(line[2]), line[3], line[4:], nodes_number, auxiliary_counter)
+            if voltage_source.type.upper() == "DC":
+                voltage_source.print_DC_stamp(matrix, vector)
             pass
 
-        elif line[0][0] == "I":
-            # Current source
-            current_source = CurrentIndependentSource(int(line[1]), int(line[2]), int(line[3]))
-            current_source.print_stamp(vector)
+        elif line[0][0].upper() == "I":
+            current_source = CurrentIndependentSource(int(line[1]), int(line[2]), line[3], line[4:])
+            if current_source.type.upper() == "DC":
+                current_source.print_DC_stamp(vector)
+            pass
 
-        elif line[0][0] == "A":
+        elif line[0][0].upper() == "A":
             # Voltage dependent voltage source
             pass
 
-        elif line[0][0] == "H":
+        elif line[0][0].upper() == "H":
             # Current dependent voltage source
             pass
 
-        elif line[0][0] == "G":
+        elif line[0][0].upper() == "G":
             # Voltage dependent current source
             pass
 
-        elif line[0][0] == "B":
+        elif line[0][0].upper() == "B":
             # Current dependent current source
             pass
 
-        elif line[0][0] == "C":
+        elif line[0][0].upper() == "C":
             # Capacitor
             pass
 
-        elif line[0][0] == "L":
+        elif line[0][0].upper() == "L":
             # Inductor
             pass
 
-        elif line[0][0] == "T":
+        elif line[0][0].upper() == "T":
             # Transformer
             pass
 
@@ -60,39 +65,42 @@ class Resistor:
         self.value = value
     
     def print_stamp(self, matrix):
-        if self.nodeA == 0:
-            matrix[self.nodeB - 1][self.nodeB - 1] += 1/self.value
-        elif self.nodeB == 0:
-            matrix[self.nodeA - 1][self.nodeA - 1] += 1/self.value
-        else:
-            matrix[self.nodeA - 1][self.nodeA - 1] += 1/self.value
-            matrix[self.nodeB - 1][self.nodeB - 1] += 1/self.value
-            matrix[self.nodeA - 1][self.nodeB - 1] += -1/self.value
-            matrix[self.nodeB - 1][self.nodeA - 1] += -1/self.value
+        matrix[self.nodeA - 1][self.nodeA - 1] += (1/self.value) * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodeB - 1] += (1/self.value) * (self.nodeB != 0)
+        matrix[self.nodeA - 1][self.nodeB - 1] += (-1/self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
+        matrix[self.nodeB - 1][self.nodeA - 1] += (-1/self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
 
 
 class VoltageIndependentSource:
-    def __init__(self, nodeA, nodeB, value):
+    def __init__(self, nodeA, nodeB, signal_type, type_args, nodes_number, auxiliary_counter):
         self.nodeA = nodeA
         self.nodeB = nodeB
-        self.value = value
+        self.type = signal_type
+        self.type_args = type_args
+        self.nodes_number = nodes_number
+        self.auxiliary_counter = auxiliary_counter
+    
+    def print_DC_stamp(self, matrix, vector):
+        self.value = int(self.type_args[0])
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter] += +1 * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter] += -1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter][self.nodeA - 1] += -1 * (self.nodeA != 0)
+        matrix[self.nodes_number + self.auxiliary_counter][self.nodeB - 1] += +1 * (self.nodeB != 0)
+        vector[self.nodes_number + self.auxiliary_counter] += -self.value
 
-
+        
 class CurrentIndependentSource:
-    def __init__(self, nodeA, nodeB, value):
+    def __init__(self, nodeA, nodeB, signal_type, type_args):
         self.nodeA = nodeA
         self.nodeB = nodeB
-        self.value = value
+        self.type = signal_type
+        self.type_args = type_args
 
-    def print_stamp(self, vector):
-        if self.nodeA == 0:
-            vector[self.nodeB - 1] = -self.value
-        elif self.nodeB == 0:
-            vector[self.nodeA - 1] = +self.value
-        else:
-            vector[self.nodeA - 1] = self.value
-            vector[self.nodeB - 1] = -self.value
-            
+    def print_DC_stamp(self, vector):
+        self.value = int(self.type_args[0])
+        vector[self.nodeA - 1] = -self.value * (self.nodeA != 0)
+        vector[self.nodeB - 1] = +self.value * (self.nodeB != 0)
+
 
 class VoltageDependentVoltageSource:
     pass
