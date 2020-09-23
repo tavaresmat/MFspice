@@ -10,7 +10,7 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
         line = line.split()
 
         if line[0][0].upper() == "R":
-            resistor = Resistor(int(line[1]), int(line[2]), int(line[3]))
+            resistor = Resistor(int(line[1]), int(line[2]), float(line[3]))
             resistor.print_stamp(matrix)
 
         elif line[0][0].upper() == "V":
@@ -28,8 +28,9 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
             pass
 
         elif line[0][0].upper() == "E":
+            auxiliary_counter += 1
             voltage_dependent_voltage_source = VoltageDependentVoltageSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
-                                                                            int(line[5]), nodes_number, auxiliary_counter)
+                                                                            float(line[5]), nodes_number, auxiliary_counter)
             voltage_dependent_voltage_source.print_stamp(matrix)
 
         elif line[0][0].upper() == "H":
@@ -41,9 +42,10 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
             pass
 
         elif line[0][0].upper() == "F":
-            current_dependen_current_source = CurrentDependentCurrentSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
-                                                                            int(line[5]), nodes_number, auxiliary_counter)
-            pass
+            auxiliary_counter += 1
+            current_dependent_current_source = CurrentDependentCurrentSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                                            float(line[5]), nodes_number, auxiliary_counter)
+            current_dependent_current_source.print_stamp(matrix)
 
         elif line[0][0].upper() == "C":
             # Capacitor
@@ -84,7 +86,7 @@ class VoltageIndependentSource:
         self.auxiliary_counter = auxiliary_counter
     
     def print_DC_stamp(self, matrix, vector):
-        self.value = int(self.type_args[0])
+        self.value = float(self.type_args[0])
         matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
         matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
         matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
@@ -100,7 +102,7 @@ class CurrentIndependentSource:
         self.type_args = type_args
 
     def print_DC_stamp(self, vector):
-        self.value = int(self.type_args[0])
+        self.value = float(self.type_args[0])
         vector[self.nodeA - 1] = -self.value * (self.nodeA != 0)
         vector[self.nodeB - 1] = +self.value * (self.nodeB != 0)
 
