@@ -2,12 +2,13 @@
 The components module includes the components classes to construct components stamps.
 """
 
+from math import pi
 import sympy as sp
 from sympy.abc import s, t
-from sympy.integrals import laplace_transform, inverse_laplace_transform 
+from sympy.integrals import laplace_transform, inverse_laplace_transform
 
 
-def create_component_stamps(lines, matrix, vector, nodes_number):
+def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
     auxiliary_counter = 0
     
     for line in lines:
@@ -23,7 +24,8 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
                                                         nodes_number, auxiliary_counter)
             if voltage_source.type.upper() == "DC":
                 voltage_source.print_DC_stamp(matrix, vector)
-            pass
+            elif voltage_source.type.upper() == "SIN":
+                pass
 
         elif line[0][0].upper() == "I":
             current_source = CurrentIndependentSource(int(line[1]), int(line[2]), line[3], line[4:])
@@ -54,12 +56,14 @@ def create_component_stamps(lines, matrix, vector, nodes_number):
             current_dependent_current_source.print_stamp(matrix)
 
         elif line[0][0].upper() == "C":
-            # Capacitor
-            pass
+            if frequency != 0:
+                capacitor = Capacitor(int(line[1]), int(line[2]), float(line[3]), frequency)
+                capacitor.print_sinusoidal_stamp(matrix)
 
         elif line[0][0].upper() == "L":
-            # Inductor
-            pass
+            auxiliary_counter += 1
+            inductor = Inductor(int(line[1]), int(line[2]), float(line[3]), frequency, nodes_number, auxiliary_counter)
+            inductor.print_sinusoidal_stamp(matrix) 
 
         elif line[0][0].upper() == "T":
             # Transformer
@@ -189,3 +193,36 @@ class CurrentDependentCurrentSource:
         matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeD != 0)
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (((self.nodeB != 0) and (self.nodeC != 0)) and
                                                                                                                 (matrix[self.nodeC - 1][self.nodeD - 1])**(-1))
+
+
+class Capacitor:
+    def __init__(self, nodeA, nodeB, value, frequency, initial_condition=0):
+        self.nodeA = nodeA
+        self.nodeB = nodeB
+        self.value = value
+        self.w = frequency * 2 * pi
+        self.initial_condition = initial_condition
+
+    def print_sinusoidal_stamp(self, matrix):
+        matrix[self.nodeA - 1][self.nodeA - 1] += (1j * self.w * self.value) * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodeB - 1] += (1j * self.w * self.value) * (self.nodeB != 0)
+        matrix[self.nodeA - 1][self.nodeB - 1] += (-1j * self.w * self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
+        matrix[self.nodeB - 1][self.nodeA - 1] += (-1j * self.w * self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
+
+
+class Inductor:
+    def __init__(self, nodeA, nodeB, value, frequency, nodes_number, auxiliary_counter, initial_condition=0):
+        self.nodeA = nodeA
+        self.nodeB = nodeB
+        self.value = value
+        self.w = frequency * 2 * pi
+        self.nodes_number = nodes_number
+        self.auxiliary_counter = auxiliary_counter
+        self.initial_condition = initial_condition
+
+    def print_sinusoidal_stamp(self, matrix):
+        matrix[self.nodeA -1][self.nodes_number + self.auxiliary_counter - 1] += 1 * (self.nodeA != 0)
+        matrix[self.nodeB -1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeA -1] += -1 * (self.nodeA != 0)
+        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeB -1] += 1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (1j * self.w * self.value)

@@ -28,7 +28,7 @@ class NetList:
             if element[0] == ".":
                 # The dot is the last value in the netlist and represents the operation mode.
                 break
-            if element[0] in "VEF":
+            if element[0] in "VEFI":
                 # These Leters represent components that need an auxiliary equation.
                 auxiliary += 1
             elif element[0] in "H":
@@ -40,4 +40,4 @@ class NetList:
                 # values[1] and values[2] are the positions for component's nodes.
                 nodes = int(max(values[1], values[2]))
 
-        return [nodes, auxiliary]
+        return (nodes, auxiliary)
