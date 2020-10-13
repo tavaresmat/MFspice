@@ -20,8 +20,8 @@ if __name__ == "__main__":
     nodes_number, auxiliary_equations_number = netlist.define_matrix_range() 
 
     N = nodes_number + auxiliary_equations_number
-    admittance_matrix = np.zeros((N, N))
-    current_vector = np.zeros(N)
+    admittance_matrix = np.zeros((N, N), dtype=complex)
+    current_vector = np.zeros(N, dtype=complex)
 
     frequency = 0
     if netlist.lines[-1].split()[0].upper() == ".SIN":
@@ -33,6 +33,11 @@ if __name__ == "__main__":
 
     nodes_voltage = np.linalg.solve(admittance_matrix, current_vector)
 
-    print("The voltage values are: \n", nodes_voltage)
-    for i in range(1, len(nodes_voltage) + 1):
-        print(f"nó ({i}) = {nodes_voltage[i - 1]}")
+    if netlist.lines[-1].split()[0].upper() == ".DC":
+        print("The voltage values are: \n", nodes_voltage)
+        for i in range(1, len(nodes_voltage) + 1):
+            print(f"nó ({i}) = {nodes_voltage[i - 1]}")
+    elif netlist.lines[-1].split()[0].upper() == ".SIN":
+        print("The voltage values are: \n", nodes_voltage)
+        for i in range(1, len(nodes_voltage) + 1):
+            print(f"nó ({i}) = {nodes_voltage[i - 1].real}Cos({frequency}t) + {-nodes_voltage[i - 1].imag}Sin({frequency}t)")

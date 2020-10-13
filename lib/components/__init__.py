@@ -3,6 +3,7 @@ The components module includes the components classes to construct components st
 """
 
 from math import pi
+from cmath import rect
 import sympy as sp
 from sympy.abc import s, t
 from sympy.integrals import laplace_transform, inverse_laplace_transform
@@ -31,7 +32,8 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
             current_source = CurrentIndependentSource(int(line[1]), int(line[2]), line[3], line[4:])
             if current_source.type.upper() == "DC":
                 current_source.print_DC_stamp(vector)
-            pass
+            elif current_source.type.upper() == "SIN":
+                current_source.print_SIN_stamp(vector)
 
         elif line[0][0].upper() == "E":
             auxiliary_counter += 1
@@ -113,6 +115,14 @@ class CurrentIndependentSource:
 
     def print_DC_stamp(self, vector):
         self.value = float(self.type_args[0])
+        vector[self.nodeA - 1] += -self.value * (self.nodeA != 0)
+        vector[self.nodeB - 1] += +self.value * (self.nodeB != 0)
+    
+    def print_SIN_stamp(self, vector):
+        self.amplitude = float(self.type_args[1])
+        self.frequency = float(self.type_args[2])
+        self.angle = float(self.type_args[5])
+        self.value = rect(self.amplitude, self.angle)
         vector[self.nodeA - 1] += -self.value * (self.nodeA != 0)
         vector[self.nodeB - 1] += +self.value * (self.nodeB != 0)
 
