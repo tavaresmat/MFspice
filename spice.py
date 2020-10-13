@@ -40,4 +40,4 @@ if __name__ == "__main__":
     elif netlist.lines[-1].split()[0].upper() == ".SIN":
         print("The voltage values are: \n", nodes_voltage)
         for i in range(1, len(nodes_voltage) + 1):
-            print(f"nó ({i}) = {nodes_voltage[i - 1].real}Cos({frequency}t) + {-nodes_voltage[i - 1].imag}Sin({frequency}t)")
+            print(f"nó ({i}) = {nodes_voltage[i - 1].real} Cos({frequency}t) + {-nodes_voltage[i - 1].imag} Sin({frequency}t)")

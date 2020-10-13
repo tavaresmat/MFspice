@@ -26,7 +26,7 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
             if voltage_source.type.upper() == "DC":
                 voltage_source.print_DC_stamp(matrix, vector)
             elif voltage_source.type.upper() == "SIN":
-                pass
+                voltage_source.print_SIN_stamp(matrix, vector)
 
         elif line[0][0].upper() == "I":
             current_source = CurrentIndependentSource(int(line[1]), int(line[2]), line[3], line[4:])
@@ -99,6 +99,17 @@ class VoltageIndependentSource:
     
     def print_DC_stamp(self, matrix, vector):
         self.value = float(self.type_args[0])
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
+        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
+        vector[self.nodes_number + self.auxiliary_counter -1] += -self.value
+
+    def print_SIN_stamp(self, matrix, vector):
+        self.amplitude = float(self.type_args[1])
+        self.frequency = float(self.type_args[2])
+        self.angle = float(self.type_args[5])
+        self.value = rect(self.amplitude, self.angle)
         matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
         matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
         matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
