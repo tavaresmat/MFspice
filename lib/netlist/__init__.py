@@ -28,7 +28,7 @@ class NetList:
             if element[0] == ".":
                 # The dot is the last value in the netlist and represents the operation mode.
                 break
-            if element[0] in "VEFL":
+            if element[0] in "VEFLO":
                 # These Leters represent components that need an auxiliary equation.
                 auxiliary += 1
             elif element[0] in "H":

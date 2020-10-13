@@ -67,9 +67,18 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
             inductor = Inductor(int(line[1]), int(line[2]), float(line[3]), frequency, nodes_number, auxiliary_counter)
             inductor.print_sinusoidal_stamp(matrix) 
 
+        elif line[0][0].upper() == "K":
+            # Mutual inductance
+            pass
+
         elif line[0][0].upper() == "T":
             # Transformer
             pass
+
+        elif line[0][0].upper() == "O":
+            auxiliary_counter += 1
+            opAmp = OpAmp(int(line[1]), int(line[2]), int(line[3]), int(line[4]), nodes_number, auxiliary_counter)
+            opAmp.print_stamp(matrix)
 
         else:
             pass
@@ -242,8 +251,24 @@ class Inductor:
         self.initial_condition = initial_condition
 
     def print_sinusoidal_stamp(self, matrix):
-        matrix[self.nodeA -1][self.nodes_number + self.auxiliary_counter - 1] += 1 * (self.nodeA != 0)
-        matrix[self.nodeB -1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += 1 * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeA -1] += -1 * (self.nodeA != 0)
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeB -1] += 1 * (self.nodeB != 0)
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (1j * self.w * self.value)
+
+
+class OpAmp:
+    def __init__(self, nodeA, nodeB, nodeC, nodeD, nodes_number, auxiliary_counter):
+        self.nodeA = nodeA
+        self.nodeB = nodeB
+        self.nodeC = nodeC
+        self.nodeD = nodeD
+        self.nodes_number = nodes_number
+        self.auxiliary_counter = auxiliary_counter
+
+    def print_stamp(self, matrix):
+        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += 1 * (self.nodeA != 0)
+        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
+        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeC - 1] += 1 * (self.nodeC != 0)
+        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeD - 1] += -1 * (self.nodeD != 0)
