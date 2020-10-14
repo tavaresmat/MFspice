@@ -33,11 +33,24 @@ if __name__ == "__main__":
 
     nodes_voltage = np.linalg.solve(admittance_matrix, current_vector)
 
+    print("""
+ _____ _                 _                _ _                _                 
+|_   _| |__   ___    ___(_)_ __ ___ _   _(_) |_  __   ____ _| |_   _  ___  ___ 
+  | | | '_ \ / _ \  / __| | '__/ __| | | | | __| \ \ / / _` | | | | |/ _ \/ __|
+  | | | | | |  __/ | (__| | | | (__| |_| | | |_   \ V / (_| | | |_| |  __/\__ \\
+  |_| |_| |_|\___|  \___|_|_|  \___|\__,_|_|\__|   \_/ \__,_|_|\__,_|\___||___/
+                                                                               
+                  
+  __ _ _ __ ___ _ 
+ / _` | '__/ _ (_)
+| (_| | | |  __/_ 
+ \__,_|_|  \___(_)
+ """)
+
     if netlist.lines[-1].split()[0].upper() == ".DC":
-        print("The voltage values are: \n", nodes_voltage)
-        for i in range(1, len(nodes_voltage) + 1):
-            print(f"nó ({i}) = {nodes_voltage[i - 1]}")
+        for index in range(1, len(nodes_voltage) + 1):
+            print(f"{'node' if index <= nodes_number else 'current'} ({index}) = {nodes_voltage[index - 1]:.3f}")
+
     elif netlist.lines[-1].split()[0].upper() == ".SIN":
-        print("The voltage values are: \n", nodes_voltage)
-        for i in range(1, len(nodes_voltage) + 1):
-            print(f"nó ({i}) = {nodes_voltage[i - 1].real} Cos({frequency}t) + {-nodes_voltage[i - 1].imag} Sin({frequency}t)")
+        for index in range(1, len(nodes_voltage) + 1):
+            print(f"{'node' if index <= nodes_number else 'current'} ({index}) = {nodes_voltage[index - 1].real:.3f} Cos({frequency}t) + {-nodes_voltage[index - 1].imag:.3f} Sin({frequency}t)")
