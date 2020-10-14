@@ -36,7 +36,7 @@ class NetList:
             
             values = element.split()
 
-            if (int(values[1]) > nodes) or (int(values[2]) > nodes):
+            if element[0] != "K" and ((int(values[1]) > nodes) or (int(values[2]) > nodes)):
                 # values[1] and values[2] are the positions for component's nodes.
                 nodes = int(max(values[1], values[2]))
 

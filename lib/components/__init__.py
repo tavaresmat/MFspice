@@ -11,7 +11,8 @@ from sympy.integrals import laplace_transform, inverse_laplace_transform
 
 def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
     auxiliary_counter = 0
-    
+    auxiliary_elements = []
+
     for line in lines:
         line = line.split()
 
@@ -21,6 +22,7 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
 
         elif line[0][0].upper() == "V":
             auxiliary_counter += 1
+            auxiliary_elements += [line[0]]
             voltage_source = VoltageIndependentSource(int(line[1]), int(line[2]), line[3], line[4:], 
                                                         nodes_number, auxiliary_counter)
             if voltage_source.type.upper() == "DC":
@@ -37,12 +39,15 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
 
         elif line[0][0].upper() == "E":
             auxiliary_counter += 1
+            auxiliary_elements += [line[0]]
             voltage_dependent_voltage_source = VoltageDependentVoltageSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
                                                                             float(line[5]), nodes_number, auxiliary_counter)
             voltage_dependent_voltage_source.print_stamp(matrix)
 
         elif line[0][0].upper() == "H":
             auxiliary_counter += 2
+            auxiliary_elements += [line[0]]
+            auxiliary_elements += ["Ix" + line[0]]
             current_dependent_voltage_source = CurrentDependentVoltageSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
                                                                             float(line[5]), nodes_number, auxiliary_counter)
             current_dependent_voltage_source.print_stamp(matrix)
@@ -53,6 +58,7 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
 
         elif line[0][0].upper() == "F":
             auxiliary_counter += 1
+            auxiliary_elements += [line[0]]
             current_dependent_current_source = CurrentDependentCurrentSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
                                                                             float(line[5]), nodes_number, auxiliary_counter)
             current_dependent_current_source.print_stamp(matrix)
@@ -64,19 +70,19 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
 
         elif line[0][0].upper() == "L":
             auxiliary_counter += 1
+            auxiliary_elements += [line[0]]
             inductor = Inductor(int(line[1]), int(line[2]), float(line[3]), frequency, nodes_number, auxiliary_counter)
             inductor.print_sinusoidal_stamp(matrix) 
 
         elif line[0][0].upper() == "K":
-            # Mutual inductance
-            pass
-
-        elif line[0][0].upper() == "T":
-            # Transformer
-            pass
+            nodeX = nodes_number + auxiliary_elements.index(line[1])
+            nodeY = nodes_number + auxiliary_elements.index(line[2])
+            mutualInductance = MutualInductance(nodeX, nodeY, frequency, float(line[3]))
+            mutualInductance.print_sinusoidal_stamp(matrix)
 
         elif line[0][0].upper() == "O":
             auxiliary_counter += 1
+            auxiliary_elements += [line[0]]
             opAmp = OpAmp(int(line[1]), int(line[2]), int(line[3]), int(line[4]), nodes_number, auxiliary_counter)
             opAmp.print_stamp(matrix)
 
@@ -256,6 +262,18 @@ class Inductor:
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeA -1] += -1 * (self.nodeA != 0)
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeB -1] += 1 * (self.nodeB != 0)
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (1j * self.w * self.value)
+
+
+class MutualInductance:
+    def __init__(self, nodeX, nodeY, frequency, coefficient_of_coupling):
+        self.nodeX = nodeX
+        self.nodeY = nodeY
+        self.w = frequency * 2 * pi
+        self.coefficient_of_coupling = coefficient_of_coupling
+
+    def print_sinusoidal_stamp(self, matrix):
+        matrix[self.nodeX][self.nodeY] += (1j * self.w * self.coefficient_of_coupling)
+        matrix[self.nodeY][self.nodeX] += (1j * self.w * self.coefficient_of_coupling)
 
 
 class OpAmp:
