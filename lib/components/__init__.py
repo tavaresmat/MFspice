@@ -4,9 +4,6 @@ The components module includes the components classes to construct components st
 
 from math import pi
 from cmath import rect
-import sympy as sp
-from sympy.abc import s, t
-from sympy.integrals import laplace_transform, inverse_laplace_transform
 
 
 def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
@@ -88,6 +85,8 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
 
         else:
             pass
+    
+    return auxiliary_elements
 
 
 class Resistor:

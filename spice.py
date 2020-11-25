@@ -6,8 +6,6 @@ Description: A simple electronic circuit simulator
 
 import numpy as np
 import sympy as sp
-from sympy.abc import s, t
-from sympy.integrals import laplace_transform, inverse_laplace_transform 
 
 from lib.netlist import NetList
 from lib import components
@@ -26,10 +24,7 @@ if __name__ == "__main__":
     frequency = 0
     if netlist.lines[-1].split()[0].upper() == ".SIN":
         frequency = float(netlist.lines[-1].split()[1])
-    components.create_component_stamps(netlist.lines, admittance_matrix, current_vector, nodes_number, frequency)
-
-    print(admittance_matrix)
-    print(current_vector)
+    auxiliary_elements = components.create_component_stamps(netlist.lines, admittance_matrix, current_vector, nodes_number, frequency)
 
     nodes_voltage = np.linalg.solve(admittance_matrix, current_vector)
 
@@ -49,8 +44,8 @@ if __name__ == "__main__":
 
     if netlist.lines[-1].split()[0].upper() == ".DC":
         for index in range(1, len(nodes_voltage) + 1):
-            print(f"{'node' if index <= nodes_number else 'current'} ({index}) = {nodes_voltage[index - 1]:.3f}")
+            print(f"{f'node({index})' if index <= nodes_number else f'current({auxiliary_elements[index - nodes_number - 1]})'} = {nodes_voltage[index - 1].real:.3f}")
 
     elif netlist.lines[-1].split()[0].upper() == ".SIN":
         for index in range(1, len(nodes_voltage) + 1):
-            print(f"{'node' if index <= nodes_number else 'current'} ({index}) = {nodes_voltage[index - 1].real:.3f} Cos({frequency}t) + {-nodes_voltage[index - 1].imag:.3f} Sin({frequency}t)")
+            print(f"{f'node({index})' if index <= nodes_number else f'current({auxiliary_elements[index - nodes_number - 1]})'} = {nodes_voltage[index - 1].real:.3f} Cos({frequency}t) + {-nodes_voltage[index - 1].imag:.3f} Sin({frequency}t)")
