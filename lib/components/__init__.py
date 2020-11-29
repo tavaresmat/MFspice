@@ -1,5 +1,5 @@
 """
-The components module includes the components classes to construct components stamps.
+The components module includes the components functions to construct components stamps.
 """
 
 from math import pi
@@ -14,74 +14,64 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
         line = line.split()
 
         if line[0][0].upper() == "R":
-            resistor = Resistor(int(line[1]), int(line[2]), float(line[3]))
-            resistor.print_stamp(matrix)
+            print_resistor_stamp(int(line[1]), int(line[2]), float(line[3]), matrix)
 
         elif line[0][0].upper() == "V":
             auxiliary_counter += 1
             auxiliary_elements += [line[0]]
-            voltage_source = VoltageIndependentSource(int(line[1]), int(line[2]), line[3], line[4:], 
-                                                        nodes_number, auxiliary_counter)
-            if voltage_source.type.upper() == "DC":
-                voltage_source.print_DC_stamp(matrix, vector)
-            elif voltage_source.type.upper() == "SIN":
-                voltage_source.print_SIN_stamp(matrix, vector)
+            if line[3].upper() == "DC":
+                print_voltage_independent_source_DC_stamp(int(line[1]), int(line[2]), float(line[4]), 
+                                                            nodes_number, auxiliary_counter, matrix, vector)
+            elif line[3].upper() == "SIN":
+                print_voltage_independent_source_SIN_stamp(int(line[1]), int(line[2]), line[4:],
+                                                            nodes_number, auxiliary_counter, matrix, vector)
 
         elif line[0][0].upper() == "I":
-            current_source = CurrentIndependentSource(int(line[1]), int(line[2]), line[3], line[4:])
-            if current_source.type.upper() == "DC":
-                current_source.print_DC_stamp(vector)
-            elif current_source.type.upper() == "SIN":
-                current_source.print_SIN_stamp(vector)
+            if line[3].upper() == "DC":
+                print_current_independent_source_DC_stamp(int(line[1]), int(line[2]), line[4], vector)
+            elif line[3].upper() == "SIN":
+                print_current_independent_source_SIN_stamp(int(line[1]), int(line[2]), line[4:], vector)
 
         elif line[0][0].upper() == "E":
             auxiliary_counter += 1
             auxiliary_elements += [line[0]]
-            voltage_dependent_voltage_source = VoltageDependentVoltageSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
-                                                                            float(line[5]), nodes_number, auxiliary_counter)
-            voltage_dependent_voltage_source.print_stamp(matrix)
+            print_voltage_dependent_voltage_source_stamp(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                        float(line[5]), nodes_number, auxiliary_counter, matrix)
 
         elif line[0][0].upper() == "H":
             auxiliary_counter += 2
             auxiliary_elements += [line[0]]
             auxiliary_elements += ["Ix" + line[0]]
-            current_dependent_voltage_source = CurrentDependentVoltageSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
-                                                                            float(line[5]), nodes_number, auxiliary_counter)
-            current_dependent_voltage_source.print_stamp(matrix)
+            print_current_dependent_voltage_source_stamp(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                        float(line[5]), nodes_number, auxiliary_counter, matrix)
 
         elif line[0][0].upper() == "G":
-            voltage_dependent_current_source = VoltageDependentCurrentSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]), float(line[5]))
-            voltage_dependent_current_source.print_stamp(matrix)
+            print_voltage_dependent_current_source_stamp(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                        float(line[5]), matrix)
 
         elif line[0][0].upper() == "F":
             auxiliary_counter += 1
             auxiliary_elements += [line[0]]
-            current_dependent_current_source = CurrentDependentCurrentSource(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
-                                                                            float(line[5]), nodes_number, auxiliary_counter)
-            current_dependent_current_source.print_stamp(matrix)
+            print_current_dependent_current_source_stamp(int(line[1]), int(line[2]), int(line[3]), int(line[4]),
+                                                        float(line[5]), nodes_number, auxiliary_counter, matrix)
 
         elif line[0][0].upper() == "C":
-            if frequency != 0:
-                capacitor = Capacitor(int(line[1]), int(line[2]), float(line[3]), frequency)
-                capacitor.print_sinusoidal_stamp(matrix)
+            print_capacitor_sinusoidal_stamp(int(line[1]), int(line[2]), float(line[3]), frequency, matrix)
 
         elif line[0][0].upper() == "L":
             auxiliary_counter += 1
             auxiliary_elements += [line[0]]
-            inductor = Inductor(int(line[1]), int(line[2]), float(line[3]), frequency, nodes_number, auxiliary_counter)
-            inductor.print_sinusoidal_stamp(matrix) 
+            print_inductor_sinusoidal_stamp(int(line[1]), int(line[2]), float(line[3]), frequency, nodes_number, auxiliary_counter, matrix) 
 
         elif line[0][0].upper() == "K":
             nodeX = nodes_number + auxiliary_elements.index(line[1])
             nodeY = nodes_number + auxiliary_elements.index(line[2])
-            mutualInductance = MutualInductance(nodeX, nodeY, frequency, float(line[3]))
-            mutualInductance.print_sinusoidal_stamp(matrix)
+            print_mutual_inductance_sinusoidal_stamp(nodeX, nodeY, frequency, float(line[3]), matrix)
 
         elif line[0][0].upper() == "O":
             auxiliary_counter += 1
             auxiliary_elements += [line[0]]
-            opAmp = OpAmp(int(line[1]), int(line[2]), int(line[3]), int(line[4]), nodes_number, auxiliary_counter)
-            opAmp.print_stamp(matrix)
+            print_OpAmp_stamp(int(line[1]), int(line[2]), int(line[3]), int(line[4]), nodes_number, auxiliary_counter, matrix)
 
         else:
             pass
@@ -89,203 +79,112 @@ def create_component_stamps(lines, matrix, vector, nodes_number, frequency=0):
     return auxiliary_elements
 
 
-class Resistor:
-    def __init__(self, nodeA, nodeB, value):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.value = value
+def print_resistor_stamp(nodeA, nodeB, value, matrix):
+    matrix[nodeA - 1][nodeA - 1] += (1/value) * (nodeA != 0)
+    matrix[nodeB - 1][nodeB - 1] += (1/value) * (nodeB != 0)
+    matrix[nodeA - 1][nodeB - 1] += (-1/value) * ((nodeA != 0) and (nodeB != 0))
+    matrix[nodeB - 1][nodeA - 1] += (-1/value) * ((nodeA != 0) and (nodeB != 0))
+
     
-    def print_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodeA - 1] += (1/self.value) * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodeB - 1] += (1/self.value) * (self.nodeB != 0)
-        matrix[self.nodeA - 1][self.nodeB - 1] += (-1/self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
-        matrix[self.nodeB - 1][self.nodeA - 1] += (-1/self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
+def print_voltage_independent_source_DC_stamp(nodeA, nodeB, value, nodes_number, auxiliary_counter, matrix, vector):
+    matrix[nodeA - 1][nodes_number + auxiliary_counter - 1] += +1 * (nodeA != 0)
+    matrix[nodeB - 1][nodes_number + auxiliary_counter - 1] += -1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeA - 1] += -1 * (nodeA != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeB - 1] += +1 * (nodeB != 0)
+    vector[nodes_number + auxiliary_counter -1] += -value
 
-
-class VoltageIndependentSource:
-    def __init__(self, nodeA, nodeB, signal_type, type_args, nodes_number, auxiliary_counter):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.type = signal_type
-        self.type_args = type_args
-        self.nodes_number = nodes_number
-        self.auxiliary_counter = auxiliary_counter
-    
-    def print_DC_stamp(self, matrix, vector):
-        self.value = float(self.type_args[0])
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
-        vector[self.nodes_number + self.auxiliary_counter -1] += -self.value
-
-    def print_SIN_stamp(self, matrix, vector):
-        self.amplitude = float(self.type_args[1])
-        self.frequency = float(self.type_args[2])
-        self.angle = float(self.type_args[5])
-        self.value = rect(self.amplitude, self.angle)
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
-        vector[self.nodes_number + self.auxiliary_counter -1] += -self.value
+def print_voltage_independent_source_SIN_stamp(nodeA, nodeB, type_args, nodes_number, auxiliary_counter, matrix, vector):
+    amplitude = float(type_args[1])
+    frequency = float(type_args[2])
+    angle = float(type_args[5])
+    value = rect(amplitude, angle)
+    matrix[nodeA - 1][nodes_number + auxiliary_counter - 1] += +1 * (nodeA != 0)
+    matrix[nodeB - 1][nodes_number + auxiliary_counter - 1] += -1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeA - 1] += -1 * (nodeA != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeB - 1] += +1 * (nodeB != 0)
+    vector[nodes_number + auxiliary_counter -1] += -value
 
         
-class CurrentIndependentSource:
-    def __init__(self, nodeA, nodeB, signal_type, type_args):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.type = signal_type
-        self.type_args = type_args
+def print_current_independent_source_DC_stamp(nodeA, nodeB, type_args, vector):
+    value = float(type_args[0])
+    vector[nodeA - 1] += -value * (nodeA != 0)
+    vector[nodeB - 1] += +value * (nodeB != 0)
 
-    def print_DC_stamp(self, vector):
-        self.value = float(self.type_args[0])
-        vector[self.nodeA - 1] += -self.value * (self.nodeA != 0)
-        vector[self.nodeB - 1] += +self.value * (self.nodeB != 0)
+def print_current_independent_source_SIN_stamp(nodeA, nodeB, type_args, vector):
+    amplitude = float(type_args[1])
+    frequency = float(type_args[2])
+    angle = float(type_args[5])
+    value = rect(amplitude, angle)
+    vector[nodeA - 1] += -value * (nodeA != 0)
+    vector[nodeB - 1] += +value * (nodeB != 0)
+
+
+def print_voltage_dependent_voltage_source_stamp(nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter, matrix):
+    matrix[nodeA - 1][nodes_number + auxiliary_counter - 1] += +1 * (nodeA != 0)
+    matrix[nodeB - 1][nodes_number + auxiliary_counter - 1] += -1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeA - 1] += -1 * (nodeA != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeB - 1] += +1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeC - 1] += +gain * (nodeC != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeD - 1] += -gain * (nodeD != 0)
+
     
-    def print_SIN_stamp(self, vector):
-        self.amplitude = float(self.type_args[1])
-        self.frequency = float(self.type_args[2])
-        self.angle = float(self.type_args[5])
-        self.value = rect(self.amplitude, self.angle)
-        vector[self.nodeA - 1] += -self.value * (self.nodeA != 0)
-        vector[self.nodeB - 1] += +self.value * (self.nodeB != 0)
+def print_current_dependent_voltage_source_stamp(nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter, matrix):
+    matrix[nodeA - 1][nodes_number + auxiliary_counter - 1] += +1 * (nodeA != 0)
+    matrix[nodeB - 1][nodes_number + auxiliary_counter - 1] += -1 * (nodeB != 0)
+    matrix[nodeC - 1][nodes_number + auxiliary_counter - 2] += (+1 and not (matrix[nodeC - 1][nodeD - 1])) * (nodeC != 0)
+    matrix[nodeD - 1][nodes_number + auxiliary_counter - 2] += (-1 and not (matrix[nodeC - 1][nodeD - 1])) * (nodeD != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeA - 1] += -1 * (nodeA != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeB - 1] += +1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter -2][nodeC - 1] += -1 * (nodeC != 0)
+    matrix[nodes_number + auxiliary_counter -2][nodeD - 1] += +1 * (nodeD != 0)
+    matrix[nodes_number + auxiliary_counter - 2][nodes_number + auxiliary_counter - 2] += (((nodeC != 0) and (nodeD != 0)) and
+                                                                                                            (matrix[nodeC - 1][nodeD - 1])**(-1))
+    matrix[nodes_number + auxiliary_counter - 1][nodes_number + auxiliary_counter - 2] += +gain
 
-
-class VoltageDependentVoltageSource:
-    def __init__(self, nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.nodeC = nodeC
-        self.nodeD = nodeD
-        self.gain = gain
-        self.nodes_number = nodes_number
-        self.auxiliary_counter = auxiliary_counter
-
-    def print_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeC - 1] += +self.gain * (self.nodeC != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeD - 1] += -self.gain * (self.nodeD != 0)
-
-
-class CurrentDependentVoltageSource:
-    def __init__(self, nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.nodeC = nodeC
-        self.nodeD = nodeD
-        self.gain = gain
-        self.nodes_number = nodes_number
-        self.auxiliary_counter = auxiliary_counter
     
-    def print_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
-        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 2] += (+1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeC != 0)
-        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 2] += (-1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeD != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -2][self.nodeC - 1] += -1 * (self.nodeC != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -2][self.nodeD - 1] += +1 * (self.nodeD != 0)
-        matrix[self.nodes_number + self.auxiliary_counter - 2][self.nodes_number + self.auxiliary_counter - 2] += (((self.nodeC != 0) and (self.nodeD != 0)) and
-                                                                                                                (matrix[self.nodeC - 1][self.nodeD - 1])**(-1))
-        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 2] += +self.gain
+def print_voltage_dependent_current_source_stamp(nodeA, nodeB, nodeC, nodeD, gain, matrix):
+    matrix[nodeA - 1][nodeC - 1] += +gain * ((nodeA != 0) and (nodeC != 0))
+    matrix[nodeA - 1][nodeD - 1] += -gain * ((nodeA != 0) and (nodeD != 0))
+    matrix[nodeB - 1][nodeC - 1] += -gain * ((nodeB != 0) and (nodeC != 0))
+    matrix[nodeB - 1][nodeD - 1] += +gain * ((nodeB != 0) and (nodeD != 0))
 
 
-class VoltageDependentCurrentSource:
-    def __init__(self, nodeA, nodeB, nodeC, nodeD, gain):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.nodeC = nodeC
-        self.nodeD = nodeD
-        self.gain = gain
-    
-    def print_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodeC - 1] += +self.gain * ((self.nodeA != 0) and (self.nodeC != 0))
-        matrix[self.nodeA - 1][self.nodeD - 1] += -self.gain * ((self.nodeA != 0) and (self.nodeD != 0))
-        matrix[self.nodeB - 1][self.nodeC - 1] += -self.gain * ((self.nodeB != 0) and (self.nodeC != 0))
-        matrix[self.nodeB - 1][self.nodeD - 1] += +self.gain * ((self.nodeB != 0) and (self.nodeD != 0))
-
-class CurrentDependentCurrentSource:
-    def __init__(self, nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.nodeC = nodeC
-        self.nodeD = nodeD
-        self.gain = gain
-        self.nodes_number = nodes_number
-        self.auxiliary_counter = auxiliary_counter
-    
-    def print_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +self.gain * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -self.gain * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeC - 1] += -1 * (self.nodeC != 0)
-        matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeD - 1] += +1 * (self.nodeD != 0)
-        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 1] += (+1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeC != 0)
-        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 1] += (-1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeD != 0)
-        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (((self.nodeB != 0) and (self.nodeC != 0)) and
-                                                                                                                (matrix[self.nodeC - 1][self.nodeD - 1])**(-1))
+def print_current_dependent_current_source_stamp(nodeA, nodeB, nodeC, nodeD, gain, nodes_number, auxiliary_counter, matrix):
+    matrix[nodeA - 1][nodes_number + auxiliary_counter - 1] += +gain * (nodeA != 0)
+    matrix[nodeB - 1][nodes_number + auxiliary_counter - 1] += -gain * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeC - 1] += -1 * (nodeC != 0)
+    matrix[nodes_number + auxiliary_counter -1][nodeD - 1] += +1 * (nodeD != 0)
+    matrix[nodeC - 1][nodes_number + auxiliary_counter - 1] += (+1 and not (matrix[nodeC - 1][nodeD - 1])) * (nodeC != 0)
+    matrix[nodeD - 1][nodes_number + auxiliary_counter - 1] += (-1 and not (matrix[nodeC - 1][nodeD - 1])) * (nodeD != 0)
+    matrix[nodes_number + auxiliary_counter - 1][nodes_number + auxiliary_counter - 1] += (((nodeB != 0) and (nodeC != 0)) and
+                                                                                                            (matrix[nodeC - 1][nodeD - 1])**(-1))
 
 
-class Capacitor:
-    def __init__(self, nodeA, nodeB, value, frequency, initial_condition=0):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.value = value
-        self.w = frequency * 2 * pi
-        self.initial_condition = initial_condition
-
-    def print_sinusoidal_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodeA - 1] += (1j * self.w * self.value) * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodeB - 1] += (1j * self.w * self.value) * (self.nodeB != 0)
-        matrix[self.nodeA - 1][self.nodeB - 1] += (-1j * self.w * self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
-        matrix[self.nodeB - 1][self.nodeA - 1] += (-1j * self.w * self.value) * ((self.nodeA != 0) and (self.nodeB != 0))
+def print_capacitor_sinusoidal_stamp(nodeA, nodeB, value, frequency, matrix, initial_condition=0):
+    w = frequency * 2 * pi
+    matrix[nodeA - 1][nodeA - 1] += (1j * w * value) * (nodeA != 0)
+    matrix[nodeB - 1][nodeB - 1] += (1j * w * value) * (nodeB != 0)
+    matrix[nodeA - 1][nodeB - 1] += (-1j * w * value) * ((nodeA != 0) and (nodeB != 0))
+    matrix[nodeB - 1][nodeA - 1] += (-1j * w * value) * ((nodeA != 0) and (nodeB != 0))
 
 
-class Inductor:
-    def __init__(self, nodeA, nodeB, value, frequency, nodes_number, auxiliary_counter, initial_condition=0):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.value = value
-        self.w = frequency * 2 * pi
-        self.nodes_number = nodes_number
-        self.auxiliary_counter = auxiliary_counter
-        self.initial_condition = initial_condition
-
-    def print_sinusoidal_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += 1 * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeA -1] += -1 * (self.nodeA != 0)
-        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeB -1] += 1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (1j * self.w * self.value)
+def print_inductor_sinusoidal_stamp(nodeA, nodeB, value, frequency, nodes_number, auxiliary_counter, matrix, initial_condition=0):
+    w = frequency * 2 * pi
+    matrix[nodeA - 1][nodes_number + auxiliary_counter - 1] += 1 * (nodeA != 0)
+    matrix[nodeB - 1][nodes_number + auxiliary_counter - 1] += -1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter - 1][nodeA -1] += -1 * (nodeA != 0)
+    matrix[nodes_number + auxiliary_counter - 1][nodeB -1] += 1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter - 1][nodes_number + auxiliary_counter - 1] += (1j * w * value)
 
 
-class MutualInductance:
-    def __init__(self, nodeX, nodeY, frequency, coefficient_of_coupling):
-        self.nodeX = nodeX
-        self.nodeY = nodeY
-        self.w = frequency * 2 * pi
-        self.coefficient_of_coupling = coefficient_of_coupling
-
-    def print_sinusoidal_stamp(self, matrix):
-        matrix[self.nodeX][self.nodeY] += (1j * self.w * self.coefficient_of_coupling)
-        matrix[self.nodeY][self.nodeX] += (1j * self.w * self.coefficient_of_coupling)
+def print_mutual_inductance_sinusoidal_stamp(nodeX, nodeY, frequency, coefficient_of_coupling, matrix):
+    w = frequency * 2 * pi
+    matrix[nodeX][nodeY] += (1j * w * coefficient_of_coupling)
+    matrix[nodeY][nodeX] += (1j * w * coefficient_of_coupling)
 
 
-class OpAmp:
-    def __init__(self, nodeA, nodeB, nodeC, nodeD, nodes_number, auxiliary_counter):
-        self.nodeA = nodeA
-        self.nodeB = nodeB
-        self.nodeC = nodeC
-        self.nodeD = nodeD
-        self.nodes_number = nodes_number
-        self.auxiliary_counter = auxiliary_counter
-
-    def print_stamp(self, matrix):
-        matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += 1 * (self.nodeA != 0)
-        matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
-        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeC - 1] += 1 * (self.nodeC != 0)
-        matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodeD - 1] += -1 * (self.nodeD != 0)
+def print_OpAmp_stamp(nodeA, nodeB, nodeC, nodeD, nodes_number, auxiliary_counter, matrix):
+    matrix[nodeA - 1][nodes_number + auxiliary_counter - 1] += 1 * (nodeA != 0)
+    matrix[nodeB - 1][nodes_number + auxiliary_counter - 1] += -1 * (nodeB != 0)
+    matrix[nodes_number + auxiliary_counter - 1][nodeC - 1] += 1 * (nodeC != 0)
+    matrix[nodes_number + auxiliary_counter - 1][nodeD - 1] += -1 * (nodeD != 0)
