@@ -184,8 +184,8 @@ class CurrentDependentVoltageSource:
     def print_stamp(self, matrix):
         matrix[self.nodeA - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeA != 0)
         matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeB != 0)
-        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 2] += +1 * (self.nodeC != 0)
-        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 2] += -1 * (self.nodeD != 0)
+        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 2] += (+1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeC != 0)
+        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 2] += (-1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeD != 0)
         matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeA - 1] += -1 * (self.nodeA != 0)
         matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeB - 1] += +1 * (self.nodeB != 0)
         matrix[self.nodes_number + self.auxiliary_counter -2][self.nodeC - 1] += -1 * (self.nodeC != 0)
@@ -224,8 +224,8 @@ class CurrentDependentCurrentSource:
         matrix[self.nodeB - 1][self.nodes_number + self.auxiliary_counter - 1] += -self.gain * (self.nodeB != 0)
         matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeC - 1] += -1 * (self.nodeC != 0)
         matrix[self.nodes_number + self.auxiliary_counter -1][self.nodeD - 1] += +1 * (self.nodeD != 0)
-        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 1] += +1 * (self.nodeC != 0)
-        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 1] += -1 * (self.nodeD != 0)
+        matrix[self.nodeC - 1][self.nodes_number + self.auxiliary_counter - 1] += (+1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeC != 0)
+        matrix[self.nodeD - 1][self.nodes_number + self.auxiliary_counter - 1] += (-1 and not (matrix[self.nodeC - 1][self.nodeD - 1])) * (self.nodeD != 0)
         matrix[self.nodes_number + self.auxiliary_counter - 1][self.nodes_number + self.auxiliary_counter - 1] += (((self.nodeB != 0) and (self.nodeC != 0)) and
                                                                                                                 (matrix[self.nodeC - 1][self.nodeD - 1])**(-1))
 
