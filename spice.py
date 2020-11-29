@@ -3,21 +3,20 @@ Author: Matheus Felinto
 Description: A simple electronic circuit simulator
 """
 
-
+import sys
 import numpy as np
-import sympy as sp
 
 from lib.netlist import NetList
 from lib import components
 
 
 if __name__ == "__main__":
-    netlist = NetList()
+    netlist = NetList(sys.argv[1])
     netlist.read_netlist()
 
     nodes_number, auxiliary_equations_number = netlist.define_matrix_range() 
 
-    N = nodes_number + auxiliary_equations_number
+    N = nodes_number + auxiliary_equations_number + 1
     admittance_matrix = np.zeros((N, N), dtype=complex)
     current_vector = np.zeros(N, dtype=complex)
 
@@ -25,6 +24,8 @@ if __name__ == "__main__":
     if netlist.lines[-1].split()[0].upper() == ".SIN":
         frequency = float(netlist.lines[-1].split()[1])
     auxiliary_elements = components.create_component_stamps(netlist.lines, admittance_matrix, current_vector, nodes_number, frequency)
+    admittance_matrix = np.delete(np.delete(admittance_matrix, 0, 0), 0, 1)
+    current_vector = np.delete(current_vector, 0, 0)
 
     nodes_voltage = np.linalg.solve(admittance_matrix, current_vector)
 
