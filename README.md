@@ -36,20 +36,20 @@ Components format for NETLIST:
 <center><img src="/images/Components.png"></center>
 <center><img src="/images/AmpOp.png"></center>
 
-- **Voltage Source**:   V<name> <a(node+)> <b(node-)> <source_type>
-- **Current Source**:   I<name> <a(node+)> <b(node-)> <source_type>
-- **Resistor**:  R<name> <a(node+)> <b(node-)> <R(resistence)>
-- **Capacitor**: C<name> <a(node+)> <b(node-)> <C(capacitance)>
-- **Indutor**:   L<name> <a(node+)> <b(node-)> <L(inductance)>
-- **Mutual Inductance**: K<name> <inductor_1_name> <inductor_2_name> <M(coupling_coefficient)>
-- **Voltage Controlled Current Source**: G<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Gm(gain)>
-- **Voltage Controlled Voltage Source**: E<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Av(gain)>
-- **Current Controlled Current Source**: F<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Bi(gain)>
-- **Current Controlled Voltage Source**: H<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Rm(gain)>
-- **Amp. op.**:  O<name> <a(output_node+)> <b(output_node-)> <c(input_node+)> <d(input_node-)>
+- **Voltage Source**:   ```V<name> <a(node+)> <b(node-)> <source_type>```
+- **Current Source**:   ```I<name> <a(node+)> <b(node-)> <source_type>```
+- **Resistor**:  ```R<name> <a(node+)> <b(node-)> <R(resistence)>```
+- **Capacitor**: ```C<name> <a(node+)> <b(node-)> <C(capacitance)>```
+- **Indutor**:   ```L<name> <a(node+)> <b(node-)> <L(inductance)>```
+- **Mutual Inductance**: ```K<name> <inductor_1_name> <inductor_2_name> <M(coupling_coefficient)>```
+- **Voltage Controlled Current Source**: ```G<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Gm(gain)>```
+- **Voltage Controlled Voltage Source**: ```E<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Av(gain)>```
+- **Current Controlled Current Source**: ```F<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Bi(gain)>```
+- **Current Controlled Voltage Source**: ```H<name> <a(output_node+)> <b(output_node-)> <c(reference_node+)> <d(reference_node-)> <Rm(gain)>```
+- **Amp. op.**:  ```O<name> <a(output_node+)> <b(output_node-)> <c(input_node+)> <d(input_node-)>```
 - _**Source types**_:
-    - DC <Value>
-    - SIN <DC_level> <Amplitude> <Frequency> <Delay> <Attenuation> <Angle> <Cicles>
+    - DC ```<Value>```
+    - SIN ```<DC_level> <Amplitude> <Frequency> <Delay> <Attenuation> <Angle> <Cicles>```
 
 The last line in the Netlist file has one of these formats:
 
