@@ -13,15 +13,17 @@ python3 spice.py <netlist_file_name>
 
 Circuit and NetList for circuit example:
 
-![Circuit example picture]("/images/circuit_example.png")
+<center><img src="images/circuit_example.png"></center>
 
->R1 1 2 2
-R2 2 0 4
-R3 2 3 8
-R4 1 3 4
-I1 0 1 DC 3
-F1 3 0 1 2 2
->.DC
+```
+R1  1  2  2
+R2  2  0  4
+R3  2  3  8
+R4  1  3  4
+I1  0  1  DC  3
+F1  3  0  1  2  2
+.DC
+```
 
 **Obs**: The program uses [numpy](https://numpy.org/) lib for calculations.
 
@@ -31,8 +33,8 @@ F1 3 0 1 2 2
 
 Components format for NETLIST:
 
-![Component models]("/images/Components.png")
-![AmpOp model]("/images/AmpOp.png")
+<center><img src="/images/Components.png"></center>
+<center><img src="/images/AmpOp.png"></center>
 
 - **Voltage Source**:   V<name> <a(node+)> <b(node-)> <source_type>
 - **Current Source**:   I<name> <a(node+)> <b(node-)> <source_type>
@@ -55,7 +57,7 @@ The last line in the Netlist file has one of these formats:
 
 or
 
->.SIN <frequency>
+>.SIN \<frequency\>
 
 
 **OBS:** Currently the program only supports one frequency per circuit, so if it is not a DC circuit the frequency used is passed in the last line.
